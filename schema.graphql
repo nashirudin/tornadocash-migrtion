@@ -1,0 +1,22 @@
+type Deposit @entity {
+  id:ID!
+  from: Bytes!
+  value: BigInt!
+  commitment: Bytes! 
+  leafIndex: BigInt! 
+  timestamp: BigInt! 
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
+
+type Withdrawal @entity {
+  id: ID!
+  to: Bytes! 
+  nullifierHash: Bytes! 
+  relayer: Bytes! 
+  fee: BigInt! 
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: Bytes!
+}
