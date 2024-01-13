@@ -5,34 +5,32 @@ import * as TornadoContractABI from './abi/TornadoContract';
 
 
 
-
-
-
 processor.run(new TypeormDatabase({supportHotBlocks: true}), async (ctx) => {
+  const deposit: Map<string, Deposit> = new Map();
+  const withdrawal: Map<string, Withdrawal> = new Map();
+    for (let block of ctx.blocks) {
+        for (let log of block.logs) {
+            if (log.address === CONTRACT_ADDRESS && [TornadoContractABI.events.Deposit.topic, TornadoContractABI.events.Withdrawal.topic].includes(log.topics[0])) {
+              const isdeposit = log.topics[0] === TornadoContractABI.events.Deposit.topic;
+              if (isdeposit) {
+              const deposit = new Deposit(log.transaction!.hash.concat(log.logIndex.toString()) as any as Partial<Deposit>
+            );
+              ctx.store.save<Deposit>(deposit);}
+
+      else {const withdrawal = new Withdrawal (log.transaction!.hash.concat(log.logIndex.toString()) as any as Partial<Withdrawal>);
+        ctx.store.save<Withdrawal>(withdrawal);
+      }
+
+      }
+    }
+  }
+        
     
-    let deposit: Deposit[] = []
-    let withdrawal: Withdrawal[] = []
-    for (let c of ctx.blocks) {
-        for (let log of c.logs) {
-            if (log.address !== CONTRACT_ADDRESS || log.topics[0] !== TornadoContractABI.events.Deposit.topic, TornadoContractABI.events.Withdrawal.topic)continue
-            let {commitment, leafIndex, timestamp} = TornadoContractABI.events.Deposit.decode(log)
-            deposit.push(new Deposit({ id: log.id, 
-                
-              }))
-              await ctx.store.save(deposit)
 
 
-              let {to, nullifierHash, relayer, fee} = TornadoContractABI.events.Withdrawal.decode(log)
-            withdrawal.push(new Withdrawal({ id: log.id, 
-                
-              }))
-              await ctx.store.save(withdrawal)
-
-
-
-        }
-    }   
-    
-    
+  ctx.store.upsert([...deposit.values()]),
+  ctx.store.upsert([...withdrawal.values()]) 
+      
+  
 })
           
