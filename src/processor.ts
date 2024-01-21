@@ -31,4 +31,5 @@ export const processor = new EvmBatchProcessor()
       TornadoContract.events.Deposit.topic,
       TornadoContract.events.Withdrawal.topic,
     ],
+    transaction: true
   })
