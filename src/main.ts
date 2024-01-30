@@ -10,27 +10,38 @@ processor.run(new TypeormDatabase({supportHotBlocks: true}), async (ctx) => {
   const withdrawal: Map<string, Withdrawal> = new Map();
     for (let block of ctx.blocks) {
         for (let log of block.logs) {
-            if (log.address === CONTRACT_ADDRESS && [TornadoContractABI.events.Deposit.topic, TornadoContractABI.events.Withdrawal.topic].includes(log.topics[0])) {
-              const isdeposit = log.topics[0] === TornadoContractABI.events.Deposit.topic;
-              if (isdeposit) {
-              const deposit = new Deposit(log.transaction!.hash.concat(log.logIndex.toString()) as any as Partial<Deposit>
-            );
-              ctx.store.save<Deposit>(deposit);}
+            if (log.topics[0] === TornadoContractABI.events.Deposit.topic) {
+              let event = TornadoContractABI.events.Deposit.decode(log);
+              let deposit = new Deposit({ 
+              id: log.transaction?.hash,
+              commitment: event.commitment,
+              leafIndex: BigInt(event.leafIndex),
+              timestamp: BigInt(event.timestamp),
+              blockNumber: BigInt(block.header.height),
+              blockTimestamp: BigInt!(block.header.timestamp),
+              transactionHash: log.transaction?.hash
+              })
+             
+            }
+            if (log.topics[0] === TornadoContractABI.events.Withdrawal.topic) {
+              let event = TornadoContractABI.events.Withdrawal.decode(log);
+              let withdrawal = new Withdrawal({
+                id: log.transaction?.hash,
+                to: event.to,
+                nullifierHash: event.nullifierHash,
+                relayer: event.relayer,
+                fee: BigInt(event.fee),
+                blockNumber: BigInt(block.header.height),
+                blockTimestamp: BigInt(block.header.timestamp),
+                transactionHash: log.transaction?.hash
 
-      else {const withdrawal = new Withdrawal (log.transaction!.hash.concat(log.logIndex.toString()) as any as Partial<Withdrawal>);
-        ctx.store.save<Withdrawal>(withdrawal);
-      }
-
-      }
-    }
-  }
-        
-    
-
-
-  ctx.store.upsert([...deposit.values()]),
-  ctx.store.upsert([...withdrawal.values()]) 
-      
-  
+              })
+             
+            }
+          }
+        }
+            
+        ctx.store.upsert([...deposit.values()]),
+        ctx.store.upsert([...withdrawal.values()]) 
 })
           
