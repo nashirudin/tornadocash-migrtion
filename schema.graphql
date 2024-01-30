@@ -1,22 +1,22 @@
 type Deposit @entity {
   id:ID!
-  from: Bytes!
+  from: String!
   value: BigInt!
-  commitment: Bytes! 
+  commitment: String! 
   leafIndex: BigInt! 
   timestamp: BigInt! 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
 }
 
 type Withdrawal @entity {
   id: ID!
-  to: Bytes! 
-  nullifierHash: Bytes! 
-  relayer: Bytes! 
+  to: String! 
+  nullifierHash: String! 
+  relayer: String! 
   fee: BigInt! 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
 }
